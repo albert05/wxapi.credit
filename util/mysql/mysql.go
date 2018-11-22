@@ -2,10 +2,9 @@ package mysql
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"strings"
 	"unsafe"
+	"reflect"
 )
 
 type Mysql struct {
@@ -17,6 +16,7 @@ type queryResult struct {
 }
 
 const DriverNAME = "mysql"
+const TableMethodName = "GetTableName"
 
 var mysqlDB map[string]Mysql
 var Conn Mysql
@@ -43,15 +43,38 @@ func GetInstance() Mysql {
 	return Mysql{DB: db}
 }
 
+func GetTable(v interface{}) string {
+	rv := reflect.ValueOf(v)
+	return rv.MethodByName(TableMethodName).Call(nil)[0].String()
+}
+
 //单条记录
-func (this *Mysql) FindOne(sql string) (MapModel, error) {
-	rows, err := this.DB.Query(sql)
+func FindCond(v interface{}, where map[string]string, fields string) error {
+	s := GetSqlInstance()
+	s.SetValues(TYPE_FIND, GetTable(v), fields, nil, where, nil)
+	s.Create()
+
+	return FindOne(v, s.S)
+}
+
+//单条记录
+func FindMultiCond(v interface{}, multiWhere [][]string, fields string) error {
+	s := GetSqlInstance()
+	s.SetValues(TYPE_FIND, GetTable(v), fields, nil, nil, multiWhere)
+	s.Create()
+
+	return FindOne(v, s.S)
+}
+
+//单条记录
+func FindOne(vr interface{}, sql string) error {
+	rows, err := Conn.DB.Query(sql)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	count := len(columns)
 	//定义输出的类型
@@ -83,12 +106,14 @@ func (this *Mysql) FindOne(sql string) (MapModel, error) {
 			result[col] = v
 		}
 	}
-	return result, nil
+
+	result.Load(vr)
+	return nil
 }
 
 //多条记录（根据上面的多条记录修改）
-func (this *Mysql) FindAll(sql string) ([]MapModel, error) {
-	rows, err := this.DB.Query(sql)
+func FindAll(sql string) ([]MapModel, error) {
+	rows, err := Conn.DB.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -130,36 +155,21 @@ func (this *Mysql) FindAll(sql string) ([]MapModel, error) {
 // string table
 // map data 插入的数据
 // return bool
-func (this *Mysql) Insert(table string, data map[string]string) bool {
-	if data == nil {
-		return false
-	}
-	var length int = len(data)
-	var i int
-	var columns = make([]string, length)
-	values := make([]interface{}, length)
+func Insert(vr interface{}) bool {
+	s := GetSqlInstance()
+	s.SetValues(TYPE_INSERT, GetTable(vr), "", Unload(vr, true), nil, nil)
+	s.Create()
 
-	for key, value := range data {
-		columns[i] = key
-		values[i] = value
-		i++
-	}
-	columnStr := strings.Join(columns, "`, `")
-	columnRep := strings.Repeat("?,", length-1)
-	sql := "INSERT INTO " + table + " (`" + columnStr + "`) VALUES (" + columnRep + "?)"
-
-	stmtIns, err := this.DB.Prepare(sql) // ? = placeholder
+	stmtIns, err := Conn.DB.Prepare(s.S) // ? = placeholder
 	if err != nil {
-		fmt.Println(err)
-		return false
+		panic(err)
 	}
 
 	defer stmtIns.Close()
 
-	result, err := stmtIns.Exec(values...) // Insert tuples (i, i^2)
+	result, err := stmtIns.Exec(s.PreValues...) // Insert tuples (i, i^2)
 	if err != nil {
-		fmt.Println(err)
-		return false
+		panic(err)
 	}
 
 	var qResult queryResult = *(*queryResult)(unsafe.Pointer(&result))
@@ -171,29 +181,22 @@ func (this *Mysql) Insert(table string, data map[string]string) bool {
 // map data 插入的数据
 // map condition 更新条件
 // return bool
-func (this *Mysql) Update(table string, data map[string]string, condition map[string]string) bool {
-	var i int
-	length := len(data)
-	columns := make([]string, length)
-	values := make([]interface{}, length)
+func Update(vr interface{}) bool {
+	data := Unload(vr, false)
+	id := data["id"]
+	delete(data, "id")
+	s := GetSqlInstance()
+	s.SetValues(TYPE_UPDATE, GetTable(vr), "", data, map[string]string{"id": id}, nil)
+	s.Create()
 
-	for key, value := range data {
-		columns[i] = key + "=?"
-		values[i] = value
-		i++
-	}
-	where, _ := condition["where"]
-
-	sql := "UPDATE " + table + " SET " + strings.Join(columns, ",") + " WHERE " + where
-
-	stmtIns, err := this.DB.Prepare(sql) // ? = placeholder
+	stmtIns, err := Conn.DB.Prepare(s.S) // ? = placeholder
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
 
 	defer stmtIns.Close()
 
-	result, err := stmtIns.Exec(values...) // Insert tuples (i, i^2)
+	result, err := stmtIns.Exec(s.PreValues...) // Insert tuples (i, i^2)
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app
 	}
@@ -202,7 +205,33 @@ func (this *Mysql) Update(table string, data map[string]string, condition map[st
 	return qResult.affectedRows > 0
 }
 
-func (this *Mysql) Exec(sql string) error {
-	_, err := this.DB.Exec(sql)
+// 更新数据
+// string table
+// map data 插入的数据
+// map condition 更新条件
+// return bool
+func UpdateCond(vr interface{}, data map[string]string, condition map[string]string) bool {
+	s := GetSqlInstance()
+	s.SetValues(TYPE_UPDATE, GetTable(vr), "", data, condition, nil)
+	s.Create()
+
+	stmtIns, err := Conn.DB.Prepare(s.S) // ? = placeholder
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	defer stmtIns.Close()
+
+	result, err := stmtIns.Exec(s.PreValues...) // Insert tuples (i, i^2)
+	if err != nil {
+		panic(err.Error()) // proper error handling instead of panic in your app
+	}
+
+	var qResult queryResult = *(*queryResult)(unsafe.Pointer(&result))
+	return qResult.affectedRows > 0
+}
+
+func Exec(sql string) error {
+	_, err := Conn.DB.Exec(sql)
 	return err
 }
