@@ -9,4 +9,7 @@ func ConfigInit() {
 	// init mysql
 	dsn := beego.AppConfig.String("dbconfig::dsn")
 	mysql.Init(dsn)
+
+	// init session
+	InitSession()
 }

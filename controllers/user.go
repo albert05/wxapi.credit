@@ -3,6 +3,8 @@ package controllers
 import (
 	"wxapi.credit/models"
 	"github.com/astaxie/beego"
+	"encoding/json"
+	"wxapi.credit/services"
 )
 
 // Operations about Users
@@ -12,12 +14,16 @@ type UserController struct {
 
 // @Title CreateUser
 // @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
-// @Failure 403 body is empty
-// @router / [post]
+// @Param
+// @Success 200 {int}
+// @Failure 403
+// @router /test [post]
 func (u *UserController) Post() {
-	params := u.Ctx.Input.Params()
+	var params map[string]string
+	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
+	u.Data["json"] = params
+	u.ServeJSON()
+
 	user, err := models.FindUser(params["openid"])
 	if err != nil {
 		u.Data["json"] = err.Error()
@@ -27,21 +33,31 @@ func (u *UserController) Post() {
 	u.ServeJSON()
 }
 
-// @Title Get
-// @Description get user by openid
-// @Param	openid		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.User
-// @Failure 403 :openid is empty
-// @router /:openid [get]
-func (u *UserController) Get() {
-	uid := u.GetString(":openid")
-	if uid != "" {
-		user, err := models.FindUser(uid)
-		if err != nil {
-			u.Data["json"] = err.Error()
-		} else {
-			u.Data["json"] = user
-		}
+// @Title Login
+// @Description User Login
+// @Param string username
+// @Param string password
+// @Success 200 {int}
+// @Failure 403
+// @router /login [post]
+func (u *UserController) Login() {
+	var params map[string]string
+	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
+
+	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	defer sess.SessionRelease(u.Ctx.ResponseWriter)
+
+	sessionId := sess.Get(params["username"])
+	if sessionId == nil {
+		sessionId = sess.SessionID()
+		sess.Set(params["username"], sessionId)
 	}
+
+	//user, err := models.FindUser(params["openid"])
+
+	var response map[string]interface{}
+	response["sessionid"] = sessionId
+	u.Data["json"] = response
+
 	u.ServeJSON()
 }
