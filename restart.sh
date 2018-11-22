@@ -5,3 +5,5 @@ git pull origin master
 rm -rf conf/app.conf
 cp conf/app.conf.bat conf/app.conf
 #supervisorctl restart wxapi
+
+chmod -R 755 restart.sh
