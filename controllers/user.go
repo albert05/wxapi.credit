@@ -14,11 +14,11 @@ type UserController struct {
 
 // @Title CreateUser
 // @Description create users
-// @Param
+// @Param openid query string true
 // @Success 200 {int}
 // @Failure 403
 // @router /test [post]
-func (u *UserController) Post() {
+func (u *UserController) Test() {
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 	u.Data["json"] = params
@@ -35,8 +35,8 @@ func (u *UserController) Post() {
 
 // @Title Login
 // @Description User Login
-// @Param string username
-// @Param string password
+// @Param username query string true
+// @Param password  query string true
 // @Success 200 {int}
 // @Failure 403
 // @router /login [post]
