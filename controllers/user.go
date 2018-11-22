@@ -35,7 +35,7 @@ func (u *UserController) Test() {
 
 // @Title Login
 // @Description User Login
-// @Param username query string true
+// @Param openid query string true
 // @Param password  query string true
 // @Success 200 {int}
 // @Failure 403
@@ -47,15 +47,15 @@ func (u *UserController) Login() {
 	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
 	defer sess.SessionRelease(u.Ctx.ResponseWriter)
 
-	sessionId := sess.Get(params["username"])
+	sessionId := sess.Get(params["openid"])
 	if sessionId == nil {
 		sessionId = sess.SessionID()
-		sess.Set(params["username"], sessionId)
+		sess.Set(params["openid"], sessionId)
 	}
 
 	//user, err := models.FindUser(params["openid"])
 
-	var response map[string]interface{}
+	response := make(map[string]interface{})
 	response["sessionid"] = sessionId
 	u.Data["json"] = response
 
