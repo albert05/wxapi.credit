@@ -4,7 +4,6 @@ import (
 	"wxapi.credit/models"
 	"github.com/astaxie/beego"
 	"encoding/json"
-	"wxapi.credit/services"
 )
 
 // Operations about Users
@@ -44,19 +43,25 @@ func (u *UserController) Login() {
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
-	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	defer sess.SessionRelease(u.Ctx.ResponseWriter)
+	//sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	//defer sess.SessionRelease(u.Ctx.ResponseWriter)
 
-	sessionId := sess.Get(params["openid"])
-	if sessionId == nil {
-		sessionId = sess.SessionID()
-		sess.Set(params["openid"], sessionId)
+	//sessionId := sess.Get(params["openid"])
+	//if sessionId == nil {
+	//	sessionId = sess.SessionID()
+	//	sess.Set(params["openid"], sessionId)
+	//}
+	s := u.GetSession(params["openid"])
+	if s == nil {
+		s = "34k34ihfuhv8uhf"
+		u.SetSession(params["openid"], s)
 	}
+
 
 	//user, err := models.FindUser(params["openid"])
 
 	response := make(map[string]interface{})
-	response["sessionid"] = sessionId
+	response["sessionid"] = s
 	u.Data["json"] = response
 
 	u.ServeJSON()
