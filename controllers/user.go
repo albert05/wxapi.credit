@@ -50,9 +50,26 @@ func (u *UserController) Login() {
 
 	//user, err := models.FindUser(params["openid"])
 
-	var response map[string]interface{}
+	response := make(map[string]interface{})
 	response["sessionid"] = sess.SessionID()
 	u.Data["json"] = response
+
+	u.ServeJSON()
+}
+
+// @Title Login
+// @Description User Login
+// @Success 200 {int}
+// @Failure 403
+// @router /search [post]
+func (u *UserController) Search() {
+	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+
+	openid := sess.Get("wx.user")
+	if v, ok := openid.(string); openid != nil && ok {
+		user, _ := models.FindUser(v)
+		u.Data["json"] = user
+	}
 
 	u.ServeJSON()
 }
