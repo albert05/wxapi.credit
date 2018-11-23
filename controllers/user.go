@@ -31,6 +31,7 @@ func (u *UserController) Login() {
 			"err": "invalid params",
 		})
 		u.ServeJSON()
+		return
 	}
 
 	r, err := wx.Login(params["code"])
@@ -39,11 +40,14 @@ func (u *UserController) Login() {
 			"err": err.Error(),
 		})
 		u.ServeJSON()
+		return
 	}
 
 	// insert into user table
 	if ok := services.InsertUser(r.OpenId); !ok {
+		u.Data["json"] = services.FailedRet("data insert failed")
 		u.ServeJSON()
+		return
 	}
 
 	// set session
@@ -64,6 +68,7 @@ func (u *UserController) Search() {
 	if !sessions.IsLogin(SS) {
 		u.Data["json"] = services.FailedRet("need login")
 		u.ServeJSON()
+		return
 	}
 
 	u.Data["json"] = services.SuccRetEx("login success", map[string]interface{}{
