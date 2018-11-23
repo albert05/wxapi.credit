@@ -15,6 +15,6 @@ func InitSession() {
 		ProviderConfig: "./tmp",
 	}
 
-	GS, _ = session.NewManager("memory", sessionConfig)
+	GS, _ = session.NewManager("file", sessionConfig)
 	go GS.GC()
 }

@@ -46,11 +46,7 @@ func (u *UserController) Login() {
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
-	sessionId := sess.Get("wx.user")
-	if sessionId == nil {
-		sess.Set("wx.user", params["username"])
-	}
-
+	sess.Set("wx.user", params["username"])
 
 	//user, err := models.FindUser(params["openid"])
 
