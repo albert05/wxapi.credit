@@ -41,22 +41,24 @@ func (u *UserController) Post() {
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
+	sess, err := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	if err != nil {
+		u.Data["json"] = err.Error()
+		u.ServeJSON()
+	}
+
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
-	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	defer sess.SessionRelease(u.Ctx.ResponseWriter)
-
-	sessionId := sess.Get(params["username"])
+	sessionId := sess.Get("wx.user")
 	if sessionId == nil {
-		sessionId = sess.SessionID()
-		sess.Set(params["username"], sessionId)
+		sess.Set("wx.user", params["username"])
 	}
 
 	//user, err := models.FindUser(params["openid"])
 
 	var response map[string]interface{}
-	response["sessionid"] = sessionId
+	response["sessionid"] = sess.SessionID()
 	u.Data["json"] = response
 
 	u.ServeJSON()
