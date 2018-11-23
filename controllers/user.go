@@ -41,6 +41,12 @@ func (u *UserController) Test() {
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
+	_, errs := u.Ctx.Request.Cookie("gosessionid")
+	if errs != nil {
+		u.Data["json"] = errs.Error()
+		u.ServeJSON()
+	}
+
 	sess, err := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
 	if err != nil {
 		u.Data["json"] = err.Error()
