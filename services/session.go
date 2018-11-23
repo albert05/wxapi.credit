@@ -15,6 +15,6 @@ func InitSession(dsn string) {
 		ProviderConfig: dsn,
 	}
 
-	GS, _ = session.NewManager("mysql", sessionConfig)
+	GS, _ = session.NewManager("redis", sessionConfig)
 	go GS.GC()
 }

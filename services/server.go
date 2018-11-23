@@ -7,9 +7,11 @@ import (
 
 func ConfigInit() {
 	// init mysql
-	dsn := beego.AppConfig.String("dbconfig::dsn")
-	mysql.Init(dsn)
+	dbDsn := beego.AppConfig.String("dbconfig::dsn")
+	mysql.Init(dbDsn)
 
 	// init session
-	InitSession(dsn)
+
+	redisDsn := beego.AppConfig.String("redisconfig::dsn")
+	InitSession(redisDsn)
 }
