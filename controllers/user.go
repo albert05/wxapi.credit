@@ -57,7 +57,7 @@ func (u *UserController) Login() {
 	u.ServeJSON()
 }
 
-// @Title Login
+// @Title Search
 // @Description User Search
 // @Success 200 {int}
 // @Failure 403
