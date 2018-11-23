@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego"
 	"encoding/json"
 	"wxapi.credit/services/sessions"
-	"github.com/astaxie/beego/session"
 	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
 )
@@ -12,12 +11,6 @@ import (
 // Operations about Users
 type UserController struct {
 	beego.Controller
-	SS session.Store
-}
-
-func (u *UserController) Init() {
-	s, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	u.SS = s
 }
 
 // @Title Login
@@ -27,7 +20,8 @@ func (u *UserController) Init() {
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
-	defer u.SS.SessionRelease(u.Ctx.ResponseWriter)
+	SS, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	defer SS.SessionRelease(u.Ctx.ResponseWriter)
 
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
@@ -52,7 +46,8 @@ func (u *UserController) Login() {
 		u.ServeJSON()
 	}
 
-	sessions.SetUser(u.SS, r.OpenId)
+	// set session
+	sessions.SetUser(SS, r.OpenId)
 
 	u.Data["json"] = services.SuccRet("login success")
 	u.ServeJSON()
@@ -64,7 +59,9 @@ func (u *UserController) Login() {
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	if !sessions.IsLogin(u.SS) {
+	SS, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+
+	if !sessions.IsLogin(SS) {
 		u.Data["json"] = services.FailedRet("need login")
 		u.ServeJSON()
 	}
