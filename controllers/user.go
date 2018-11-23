@@ -42,6 +42,7 @@ func (u *UserController) Test() {
 // @router /login [post]
 func (u *UserController) Login() {
 	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	defer sess.SessionRelease(u.Ctx.ResponseWriter)
 
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
