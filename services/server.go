@@ -3,7 +3,6 @@ package services
 import (
 	"github.com/astaxie/beego"
 	"wxapi.credit/util/mysql"
-	_ "github.com/astaxie/beego/session/redis"
 )
 
 func ConfigInit() {

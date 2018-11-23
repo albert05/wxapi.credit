@@ -1,6 +1,9 @@
 package services
 
-import "github.com/astaxie/beego/session"
+import (
+	"github.com/astaxie/beego/session"
+	_ "github.com/astaxie/beego/session/redis"
+)
 
 var GS *session.Manager
 
