@@ -4,6 +4,7 @@ import (
 	_ "wxapi.credit/routers"
 
 	"github.com/astaxie/beego"
+	"wxapi.credit/services"
 )
 
 func main() {
@@ -11,5 +12,6 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
+	services.ConfigInit()
 	beego.Run()
 }
