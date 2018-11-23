@@ -69,10 +69,11 @@ func (u *UserController) Search() {
 	}
 
 	openid := sess.Get("wx.user")
-	if v, ok := openid.(string); openid != nil && ok {
-		user, _ := models.FindUser(v)
-		u.Data["json"] = user
-	}
+	u.Data["json"] = map[string]interface{}{"o": openid}
+	//if v, ok := openid.(string); openid != nil && ok {
+	//	user, _ := models.FindUser(v)
+	//	u.Data["json"] = user
+	//}
 
 	u.ServeJSON()
 }
