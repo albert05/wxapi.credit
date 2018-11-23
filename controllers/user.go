@@ -63,7 +63,10 @@ func (u *UserController) Login() {
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	sess, err := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	if err != nil {
+		u.Data["json"] = err.Error()
+	}
 
 	openid := sess.Get("wx.user")
 	if v, ok := openid.(string); openid != nil && ok {
