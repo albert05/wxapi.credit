@@ -100,3 +100,31 @@ func PJson(url string, b io.Reader) ([]byte, error) {
 
 	return body, nil
 }
+
+
+func Get(url string, params map[string]string) ([]byte, error) {
+	resp, err := http.Get(makeGetUrl(url, params))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func makeGetUrl(url string, params map[string]string) string {
+	var p string
+	if len(params) > 0 {
+		p = "?"
+		for k, v := range params {
+			p += k + "=" + v
+		}
+	}
+
+	return url + p
+}

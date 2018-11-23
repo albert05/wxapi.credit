@@ -1,80 +1,76 @@
 package controllers
 
 import (
-	"wxapi.credit/models"
 	"github.com/astaxie/beego"
 	"encoding/json"
+	"wxapi.credit/services/sessions"
+	"github.com/astaxie/beego/session"
+	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
 )
 
 // Operations about Users
 type UserController struct {
 	beego.Controller
+	SS session.Store
 }
 
-// @Title CreateUser
-// @Description create users
-// @Param openid query string true
-// @Success 200 {int}
-// @Failure 403
-// @router /test [post]
-func (u *UserController) Test() {
-	var params map[string]string
-	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
-	u.Data["json"] = params
-	u.ServeJSON()
-
-	user, err := models.FindUser(params["openid"])
-	if err != nil {
-		u.Data["json"] = err.Error()
-	} else {
-		u.Data["json"] = user
-	}
-	u.ServeJSON()
+func (u *UserController) Init() {
+	s, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
+	u.SS = s
 }
 
 // @Title Login
 // @Description User Login
-// @Param openid query string true
-// @Param password  query string true
+// @Param code query string true
 // @Success 200 {int}
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
-	sess, _ := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	defer sess.SessionRelease(u.Ctx.ResponseWriter)
+	defer u.SS.SessionRelease(u.Ctx.ResponseWriter)
 
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
-	sess.Set("wx.user", params["username"])
+	if _, ok := params["code"]; !ok {
+		u.Data["json"] = services.FailedRetEx("login failed", map[string]interface{}{
+			"err": "invalid params",
+		})
+		u.ServeJSON()
+	}
 
-	//user, err := models.FindUser(params["openid"])
+	r, err := wx.Login(params["code"])
+	if  err != nil {
+		u.Data["json"] = services.FailedRetEx("login failed", map[string]interface{}{
+			"err": err.Error(),
+		})
+		u.ServeJSON()
+	}
 
-	response := make(map[string]interface{})
-	response["sessionid"] = sess.SessionID()
-	u.Data["json"] = response
+	// insert into user table
+	if ok := services.InsertUser(r.OpenId); !ok {
+		u.ServeJSON()
+	}
 
+	sessions.SetUser(u.SS, r.OpenId)
+
+	u.Data["json"] = services.SuccRet("login success")
 	u.ServeJSON()
 }
 
 // @Title Login
-// @Description User Login
+// @Description User Search
 // @Success 200 {int}
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	sess, err := services.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	if err != nil {
-		u.Data["json"] = err.Error()
+	if !sessions.IsLogin(u.SS) {
+		u.Data["json"] = services.FailedRet("need login")
+		u.ServeJSON()
 	}
 
-	openid := sess.Get("wx.user")
-	u.Data["json"] = map[string]interface{}{"o": openid}
-	//if v, ok := openid.(string); openid != nil && ok {
-	//	user, _ := models.FindUser(v)
-	//	u.Data["json"] = user
-	//}
-
+	u.Data["json"] = services.SuccRetEx("login success", map[string]interface{}{
+		"openid": sessions.OpenID,
+	})
 	u.ServeJSON()
 }

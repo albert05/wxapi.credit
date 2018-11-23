@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/astaxie/beego"
 	"wxapi.credit/util/mysql"
+	"wxapi.credit/services/sessions"
 )
 
 func ConfigInit() {
@@ -10,7 +11,7 @@ func ConfigInit() {
 	dbDsn := beego.AppConfig.String("dbconfig::dsn")
 	mysql.Init(dbDsn)
 
-	// init session
+	// init sessions
 	redisDsn := beego.AppConfig.String("redisconfig::dsn")
-	InitSession(redisDsn)
+	sessions.InitSession(redisDsn)
 }
