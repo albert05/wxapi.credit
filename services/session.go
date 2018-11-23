@@ -19,5 +19,5 @@ func InitSession(dsn string) {
 	}
 
 	GS, _ = session.NewManager("redis", sessionConfig)
-	go GS.GC()
+	//go GS.GC()
 }
