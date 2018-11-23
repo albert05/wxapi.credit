@@ -11,5 +11,5 @@ func ConfigInit() {
 	mysql.Init(dsn)
 
 	// init session
-	InitSession()
+	InitSession(dsn)
 }

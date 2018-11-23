@@ -4,7 +4,7 @@ import "github.com/astaxie/beego/session"
 
 var GS *session.Manager
 
-func InitSession() {
+func InitSession(dsn string) {
 	sessionConfig := &session.ManagerConfig{
 		CookieName:"gosessionid",
 		EnableSetCookie: true,
@@ -12,9 +12,9 @@ func InitSession() {
 		Maxlifetime: 3600,
 		Secure: false,
 		CookieLifeTime: 3600,
-		ProviderConfig: "./tmp",
+		ProviderConfig: dsn,
 	}
 
-	GS, _ = session.NewManager("file", sessionConfig)
+	GS, _ = session.NewManager("mysql", sessionConfig)
 	go GS.GC()
 }
