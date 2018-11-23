@@ -18,6 +18,10 @@ func InitSession(dsn string) {
 		ProviderConfig: dsn,
 	}
 
-	GS, _ = session.NewManager("redis", sessionConfig)
+	gs, err := session.NewManager("redis", sessionConfig)
+	if err != nil {
+		panic(err)
+	}
+	GS = gs
 	//go GS.GC()
 }
