@@ -11,7 +11,6 @@ func ConfigInit() {
 	mysql.Init(dbDsn)
 
 	// init session
-
 	redisDsn := beego.AppConfig.String("redisconfig::dsn")
 	InitSession(redisDsn)
 }

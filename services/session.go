@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/astaxie/beego/session"
 	_ "github.com/astaxie/beego/session/redis"
+	"github.com/astaxie/beego"
 )
 
 var GS *session.Manager
@@ -18,10 +19,10 @@ func InitSession(dsn string) {
 		ProviderConfig: dsn,
 	}
 
-	gs, err := session.NewManager("redis", sessionConfig)
+	var err error
+	GS, err = session.NewManager("redis", sessionConfig)
 	if err != nil {
-		panic(err)
+		beego.BeeLogger.Info(err.Error())
 	}
-	GS = gs
 	//go GS.GC()
 }
