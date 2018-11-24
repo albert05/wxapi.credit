@@ -28,11 +28,15 @@ func (u *UserController) Login() {
 		})
 	}
 
-	r, err := wx.Login(params["code"])
-	if  err != nil {
-		u.Abort666("data insert failed", map[string]interface{}{
-			"err": err.Error(),
-		})
+	//r, err := wx.Login(params["code"])
+	//if  err != nil {
+	//	u.Abort666("login failed", map[string]interface{}{
+	//		"err": err.Error(),
+	//	})
+	//}
+
+	r := &wx.LoginResp{
+		OpenId: "123456",
 	}
 
 	// insert into user table
