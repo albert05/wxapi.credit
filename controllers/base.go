@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"wxapi.credit/models"
+	"encoding/json"
 )
 
 const SessionKeyX  = "WX.USER"
@@ -40,17 +41,26 @@ func (ctx *BaseController) JsonSucc(msg string, datas ...map[string]interface{})
 }
 
 func (ctx *BaseController) Abort666(msg string, datas ...map[string]interface{}) {
+	ctx.Ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
+
 	var data map[string]interface{}
 	if len(datas) > 0 {
 		data = datas[0]
 	}
-	ctx.Data["json"] = &Code{
+
+	ctx.CustomAbort(200, map2Json(&Code{
 		Code:   FAILED_CODE,
 		Message:    msg,
 		Data: data,
-	}
-	ctx.Abort("666")
+	}))
 }
+
+func map2Json(data interface{}) string {
+	content, _ := json.Marshal(data)
+
+	return string(content)
+}
+
 
 func (ctx *BaseController) JsonLogin() {
 	ctx.Data["json"] = &Code{
