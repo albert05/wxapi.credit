@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
-	"wxapi.credit/models"
 )
 
 // Operations about Users
