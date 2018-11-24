@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
 	"encoding/json"
 	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
@@ -10,7 +9,7 @@ import (
 
 // Operations about Users
 type UserController struct {
-	beego.Controller
+	BaseController
 }
 
 // @Title Login
@@ -24,35 +23,27 @@ func (u *UserController) Login() {
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
 	if _, ok := params["code"]; !ok {
-		u.Data["json"] = services.FailedRetEx("login failed", map[string]interface{}{
+		u.Abort666("login failed", map[string]interface{}{
 			"err": "invalid params",
 		})
-		u.ServeJSON()
-		return
 	}
 
 	r, err := wx.Login(params["code"])
 	if  err != nil {
-		u.Data["json"] = services.FailedRetEx("login failed", map[string]interface{}{
+		u.Abort666("data insert failed", map[string]interface{}{
 			"err": err.Error(),
 		})
-		u.ServeJSON()
-		return
 	}
 
 	// insert into user table
 	if ok := services.InsertUser(r.OpenId); !ok {
-		u.Data["json"] = services.FailedRet("data insert failed")
-		u.ServeJSON()
-		return
+		u.Abort666("data insert failed")
 	}
 
 	// set session
-	u.SetSession(beego.AppConfig.String("SessionKeyX"), r.OpenId)
-	u.CruSession.SessionRelease(u.Ctx.ResponseWriter)
+	u.SetSession(SessionKeyX, r.OpenId)
 
-	u.Data["json"] = services.SuccRet("login success")
-	u.ServeJSON()
+	u.JsonSucc("login success")
 }
 
 // @Title Search
@@ -61,8 +52,11 @@ func (u *UserController) Login() {
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	u.Data["json"] = services.SuccRetEx("login success", map[string]interface{}{
+	if !u.IsLogin {
+		u.JsonLogin()
+	}
+
+	u.JsonSucc("login success", map[string]interface{}{
 		"openid": models.OpenID,
 	})
-	u.ServeJSON()
 }
