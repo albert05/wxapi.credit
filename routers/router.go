@@ -25,6 +25,5 @@ func init() {
 	beego.AddNamespace(ns)
 
 	filter.Set("/v1/user/login")
-	filter.Set("/v1/user/tologin")
 	beego.InsertFilter("*", beego.BeforeExec, filter.SessionFilter)
 }

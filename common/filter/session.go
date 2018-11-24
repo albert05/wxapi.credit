@@ -6,6 +6,8 @@ import (
 	"github.com/astaxie/beego/session"
 	"wxapi.credit/models"
 	_ "github.com/astaxie/beego/session/redis"
+	"wxapi.credit/services"
+	"os"
 )
 
 // wx user sessions valid 30 days
@@ -32,8 +34,9 @@ func SessionFilter(ctx *context.Context) {
 
 	key := beego.AppConfig.String("SessionKeyX")
 	o, ok := ss.Get(key).(string)
-	if !ok && ctx.Request.RequestURI != "/login" {
-		ctx.Redirect(302, "/tologin")
+	if !ok {
+		ctx.Output.JSON(services.CustomRet(services.LOGIN_CODE, "to login"), false, false)
+		os.Exit(services.LOGIN_CODE)
 	}
 
 	models.OpenID = o

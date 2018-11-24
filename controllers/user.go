@@ -66,14 +66,3 @@ func (u *UserController) Search() {
 	})
 	u.ServeJSON()
 }
-
-// @Title login
-// @Description User Is Login
-// @Success 200 {int}
-// @Failure 403
-// @router /tologin [post]
-func (u *UserController) ToLogin() {
-	u.Data["json"] = services.CustomRet(services.LOGIN_CODE, "to login")
-	u.ServeJSON()
-}
-
