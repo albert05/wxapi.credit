@@ -11,6 +11,7 @@ import (
 	"wxapi.credit/controllers"
 
 	"github.com/astaxie/beego"
+	"wxapi.credit/services"
 )
 
 func init() {
@@ -22,4 +23,7 @@ func init() {
 		),
 	)
 	beego.AddNamespace(ns)
+
+	// filter not must login
+	services.LFilter.Add("v1/user/login")
 }

@@ -4,8 +4,6 @@ import (
 	"wxapi.credit/util/mysql"
 )
 
-var OpenID string
-
 type User struct {
 	Id       	int		`db:"id"`
 	Gender  	int		`db:"gender"`

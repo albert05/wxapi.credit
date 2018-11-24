@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"wxapi.credit/models"
 	"encoding/json"
+	"wxapi.credit/services"
 )
 
 const SessionKeyX  = "WX.USER"
@@ -24,8 +25,17 @@ func (ctx *BaseController) Prepare() {
 			ctx.IsLogin = true
 		}
 	}
+
+	ctx.MustLogin()
 }
 
+func (ctx *BaseController) MustLogin() {
+	uri := ctx.Ctx.Input.URI()
+	uriList := services.LFilter.GetNLoginList()
+	if _, ok := uriList[uri]; !ok && !ctx.IsLogin {
+		ctx.JsonLogin()
+	}
+}
 
 func (ctx *BaseController) JsonSucc(msg string, datas ...map[string]interface{}) {
 	var data map[string]interface{}

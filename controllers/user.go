@@ -55,10 +55,6 @@ func (u *UserController) Login() {
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	if !u.IsLogin {
-		u.JsonLogin()
-	}
-
 	u.JsonSucc("login success", map[string]interface{}{
 		"openid": u.User.Openid,
 	})
