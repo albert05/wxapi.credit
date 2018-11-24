@@ -75,9 +75,9 @@ const FAILED_CODE  = 100
 const LOGIN_CODE  = 300
 
 type Code struct {
-	Code int
-	Message string
-	Data  	map[string]interface{}
+	Code int						`json:"code"`
+	Message string 					`json:"message"`
+	Data  	map[string]interface{} 	`json:"data"`
 }
 
 
