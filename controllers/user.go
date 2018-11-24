@@ -61,6 +61,6 @@ func (u *UserController) Search() {
 	}
 
 	u.JsonSucc("login success", map[string]interface{}{
-		"openid": models.OpenID,
+		"openid": u.User.Openid,
 	})
 }
