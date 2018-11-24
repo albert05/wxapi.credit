@@ -5,6 +5,7 @@ import (
 	"wxapi.credit/util/mysql"
 	"encoding/gob"
 	"wxapi.credit/models"
+	_ "github.com/astaxie/beego/session/redis"
 )
 
 const LifeTime = 86400 * 29
