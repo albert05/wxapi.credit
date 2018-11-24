@@ -3,9 +3,9 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"encoding/json"
-	"wxapi.credit/services/sessions"
 	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
+	"wxapi.credit/models"
 )
 
 // Operations about Users
@@ -20,9 +20,6 @@ type UserController struct {
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
-	SS, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-	defer SS.SessionRelease(u.Ctx.ResponseWriter)
-
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
@@ -51,7 +48,8 @@ func (u *UserController) Login() {
 	}
 
 	// set session
-	sessions.SetUser(SS, r.OpenId)
+	u.SetSession(beego.AppConfig.String("SessionKeyX"), r.OpenId)
+	u.CruSession.SessionRelease(u.Ctx.ResponseWriter)
 
 	u.Data["json"] = services.SuccRet("login success")
 	u.ServeJSON()
@@ -63,16 +61,19 @@ func (u *UserController) Login() {
 // @Failure 403
 // @router /search [post]
 func (u *UserController) Search() {
-	SS, _ := sessions.GS.SessionStart(u.Ctx.ResponseWriter, u.Ctx.Request)
-
-	if !sessions.IsLogin(SS) {
-		u.Data["json"] = services.FailedRet("need login")
-		u.ServeJSON()
-		return
-	}
-
 	u.Data["json"] = services.SuccRetEx("login success", map[string]interface{}{
-		"openid": sessions.OpenID,
+		"openid": models.OpenID,
 	})
 	u.ServeJSON()
 }
+
+// @Title login
+// @Description User Is Login
+// @Success 200 {int}
+// @Failure 403
+// @router /tologin [post]
+func (u *UserController) ToLogin() {
+	u.Data["json"] = services.CustomRet(services.LOGIN_CODE, "to login")
+	u.ServeJSON()
+}
+

@@ -2,6 +2,7 @@ package services
 
 const SUCCESS_CODE  = 200
 const FAILED_CODE  = 100
+const LOGIN_CODE  = 300
 
 type Code struct {
 	Code int

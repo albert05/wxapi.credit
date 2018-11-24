@@ -11,6 +11,7 @@ import (
 	"wxapi.credit/controllers"
 
 	"github.com/astaxie/beego"
+	"wxapi.credit/common/filter"
 )
 
 func init() {
@@ -22,4 +23,8 @@ func init() {
 		),
 	)
 	beego.AddNamespace(ns)
+
+	filter.Set("/v1/user/login")
+	filter.Set("/v1/user/tologin")
+	beego.InsertFilter("*", beego.BeforeExec, filter.SessionFilter)
 }
