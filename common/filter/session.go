@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/session"
 	"wxapi.credit/models"
+	_ "github.com/astaxie/beego/session/redis"
 )
 
 // wx user sessions valid 30 days
