@@ -47,8 +47,8 @@ func (u *UserController) Login() {
 	})
 }
 
-// @Title Search
-// @Description User Search
+// @Title UploadUserInfo
+// @Description User UploadUserInfo
 // @Param nickName query string true
 // @Param avatarUrl query string true
 // @Param gender query string true
@@ -72,7 +72,22 @@ func (u *UserController) UploadUserInfo() {
 		"language": u.Params["language"],
 	})
 
-	u.JsonSucc("upload success", map[string]interface{}{
-		"openid": u.User.Openid,
-	})
+	u.JsonSucc("upload success")
 }
+
+// @Title Remind
+// @Description User Remind
+// @Param status query int true
+// @Success 200 {int}
+// @Failure 403
+// @router /remind [post]
+func (u *UserController) Remind() {
+	u.MustParams("status")
+
+	u.User.Update(mysql.MapModel{
+		"remind": u.Params["status"],
+	})
+
+	u.JsonSucc("upload success")
+}
+

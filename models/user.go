@@ -16,6 +16,8 @@ type User struct {
 	Province  	string	`db:"province"`
 	City  		string	`db:"city"`
 	Country  	string	`db:"country"`
+	Language  	string	`db:"language"`
+	Remind  	string	`db:"remind"`
 }
 
 func (u *User) GetTableName() string {
