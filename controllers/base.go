@@ -5,6 +5,7 @@ import (
 	"wxapi.credit/models"
 	"encoding/json"
 	"wxapi.credit/services"
+	"strings"
 )
 
 const SessionKeyX  = "WX.USER"
@@ -31,6 +32,7 @@ func (ctx *BaseController) Prepare() {
 
 func (ctx *BaseController) MustLogin() {
 	uri := ctx.Ctx.Input.URI()
+	uri = strings.TrimRight(strings.TrimLeft(uri, "/"), "/")
 	uriList := services.LFilter.GetNLoginList()
 	if _, ok := uriList[uri]; !ok && !ctx.IsLogin {
 		ctx.JsonLogin()
