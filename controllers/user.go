@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"encoding/json"
 	"wxapi.credit/services/wx"
 	"wxapi.credit/services"
+	"wxapi.credit/util/mysql"
 )
 
 // Operations about Users
@@ -18,16 +18,9 @@ type UserController struct {
 // @Failure 403
 // @router /login [post]
 func (u *UserController) Login() {
-	var params map[string]string
-	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
+	u.MustParams("userCode")
 
-	if _, ok := params["userCode"]; !ok {
-		u.Abort666("login failed", map[string]interface{}{
-			"err": "invalid params",
-		})
-	}
-
-	r, err := wx.Login(params["userCode"])
+	r, err := wx.Login(u.Params["userCode"])
 	if  err != nil {
 		u.Abort666("login failed", map[string]interface{}{
 			"err": err.Error(),
@@ -56,11 +49,30 @@ func (u *UserController) Login() {
 
 // @Title Search
 // @Description User Search
+// @Param nickName query string true
+// @Param avatarUrl query string true
+// @Param gender query string true
+// @Param city query string true
+// @Param province query string true
+// @Param country query string true
+// @Param language query string true
 // @Success 200 {int}
 // @Failure 403
-// @router /search [post]
-func (u *UserController) Search() {
-	u.JsonSucc("login success", map[string]interface{}{
+// @router /upload-user-info [post]
+func (u *UserController) UploadUserInfo() {
+	u.MustParams("nickName", "avatarUrl", "gender", "city", "province", "country", "language")
+
+	u.User.Update(mysql.MapModel{
+		"nick_name": u.Params["nickName"],
+		"avatar_url": u.Params["avatarUrl"],
+		"gender": u.Params["gender"],
+		"province": u.Params["city"],
+		"city": u.Params["province"],
+		"country": u.Params["country"],
+		"language": u.Params["language"],
+	})
+
+	u.JsonSucc("upload success", map[string]interface{}{
 		"openid": u.User.Openid,
 	})
 }

@@ -29,15 +29,9 @@ func FindUser(openid string) (*User, error) {
 	return &u, err
 }
 
-func UpdateUser(openid string, data mysql.MapModel) bool {
-	var u User
-	err := mysql.FindCond(&u, map[string]string{"openid": openid}, "*")
-	if err !=nil || u.Id == 0 {
-		return false
-	}
-
-	data.Load(&u)
-	return mysql.Update(&u)
+func (u *User) Update(data mysql.MapModel) bool {
+	data.Load(u)
+	return mysql.Update(u)
 }
 
 func InsertUser(data mysql.MapModel) *User {

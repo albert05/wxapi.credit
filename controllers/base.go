@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"wxapi.credit/services"
 	"strings"
+	"wxapi.credit/common"
 )
 
 const SessionKeyX  = "WX.USER"
@@ -14,20 +15,31 @@ const SessionKeyX  = "WX.USER"
 type BaseController struct {
 	beego.Controller
 	IsLogin bool //标识 用户是否登陆
-	User    models.User //登陆的用户
+	User    *models.User //登陆的用户
+	Params	map[string]string
 }
 
 func (ctx *BaseController) Prepare() {
+	json.Unmarshal(ctx.Ctx.Input.RequestBody, &ctx.Params)
+
 	ctx.IsLogin = false
 	if u, ok := ctx.GetSession(SessionKeyX).(string); ok {
 		user, err := models.FindUser(u)
 		if user.Id > 0 && err == nil {
-			ctx.User = *user
+			ctx.User = user
 			ctx.IsLogin = true
 		}
 	}
 
 	ctx.MustLogin()
+}
+
+func (ctx *BaseController) MustParams(keys ...string) {
+	if !common.CheckParams(ctx.Params, keys) {
+		ctx.Abort666("failed", map[string]interface{}{
+			"err": "invalid params",
+		})
+	}
 }
 
 func (ctx *BaseController) MustLogin() {
