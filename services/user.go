@@ -5,21 +5,21 @@ import (
 	"wxapi.credit/util/mysql"
 )
 
-func InsertUser(openid string) bool {
+func InsertUser(openid string) *models.User {
 	user, err := models.FindUser(openid)
 	if err != nil {
-		return false
+		return nil
 	}
 
 	if user.Id > 0 {
-		return true
+		return user
 	}
 
 	if u := models.InsertUser(mysql.MapModel{
 		"openid": openid,
-	}); u == nil {
-		return false
+	}); u != nil {
+		return u
 	}
 
-	return true
+	return nil
 }

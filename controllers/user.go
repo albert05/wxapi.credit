@@ -13,7 +13,7 @@ type UserController struct {
 
 // @Title Login
 // @Description User Login
-// @Param code query string true
+// @Param userCode query string true
 // @Success 200 {int}
 // @Failure 403
 // @router /login [post]
@@ -21,32 +21,37 @@ func (u *UserController) Login() {
 	var params map[string]string
 	json.Unmarshal(u.Ctx.Input.RequestBody, &params)
 
-	if _, ok := params["code"]; !ok {
+	if _, ok := params["userCode"]; !ok {
 		u.Abort666("login failed", map[string]interface{}{
 			"err": "invalid params",
 		})
 	}
 
-	//r, err := wx.Login(params["code"])
-	//if  err != nil {
-	//	u.Abort666("login failed", map[string]interface{}{
-	//		"err": err.Error(),
-	//	})
+	r, err := wx.Login(params["userCode"])
+	if  err != nil {
+		u.Abort666("login failed", map[string]interface{}{
+			"err": err.Error(),
+		})
+	}
+	//
+	//r := &wx.LoginResp{
+	//	OpenId: "123456",
 	//}
 
-	r := &wx.LoginResp{
-		OpenId: "123456",
-	}
-
 	// insert into user table
-	if ok := services.InsertUser(r.OpenId); !ok {
+	user := services.InsertUser(r.OpenId);
+	if user == nil {
 		u.Abort666("data insert failed")
 	}
 
 	// set session
 	u.SetSession(SessionKeyX, r.OpenId)
 
-	u.JsonSucc("login success")
+	u.JsonSucc("login success", map[string]interface{}{
+		"uid": user.Id,
+		"sessionid": u.CruSession.SessionID(),
+		"remindStatus": 1, //TODO
+	})
 }
 
 // @Title Search
