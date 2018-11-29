@@ -7,8 +7,8 @@ import (
 type FormidInfo struct {
 	Id       	int		`db:"id"`
 	UserId  	int		`db:"user_id"`
-	Formid  	int		`db:"formid"`
-	Status 		string  `db:"status"`
+	Formid  	string	`db:"formid"`
+	Status 		int  	`db:"status"`
 	CreatedAt  	int32	`db:"created_at"`
 	UpdatedAt  	int32	`db:"updated_at"`
 }

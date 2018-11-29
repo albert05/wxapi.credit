@@ -29,3 +29,21 @@ func (u *UploadController) UploadFormid() {
 
 	u.JsonSucc("upload success")
 }
+
+// @Title UploadFeedback
+// @Description User UploadFeedback
+// @Param formid query string true
+// @Success 200 {int}
+// @Failure 403
+// @router /upload-feedback [post]
+func (u *UploadController) UploadFeedback() {
+	u.MustParams("phone", "content")
+
+	models.InsertFeedback(mysql.MapModel{
+		"phone": u.Params["phone"],
+		"content": u.Params["content"],
+		"user_id": u.User.Id,
+	})
+
+	u.JsonSucc("upload success")
+}
