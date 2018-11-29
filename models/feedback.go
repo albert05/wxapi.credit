@@ -7,7 +7,7 @@ import (
 type Feedback struct {
 	Id       	int		`db:"id"`
 	UserId  	int		`db:"user_id"`
-	Phone  		string	`db:"phone"`
+	Phone  		int		`db:"phone"`
 	Content  	string	`db:"content"`
 	Status 		int  	`db:"status"`
 	CreatedAt  	int32	`db:"created_at"`

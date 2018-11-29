@@ -26,6 +26,11 @@ func init() {
 				&controllers.UploadController{},
 			),
 		),
+		beego.NSNamespace("/card",
+			beego.NSInclude(
+				&controllers.CardController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 

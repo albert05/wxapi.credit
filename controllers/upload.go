@@ -3,6 +3,7 @@ package controllers
 import (
 	"wxapi.credit/util/mysql"
 	"wxapi.credit/models"
+	"wxapi.credit/common"
 )
 
 // Operations about Upload
@@ -40,7 +41,7 @@ func (u *UploadController) UploadFeedback() {
 	u.MustParams("phone", "content")
 
 	models.InsertFeedback(mysql.MapModel{
-		"phone": u.Params["phone"],
+		"phone": common.Str2Int(u.Params["phone"]),
 		"content": u.Params["content"],
 		"user_id": u.User.Id,
 	})
