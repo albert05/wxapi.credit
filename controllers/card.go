@@ -33,6 +33,9 @@ func (u *CardController) AddCreditCard() {
 		})
 	}
 
+	creditLine := common.Float2Money(common.Str2Float(u.Params["lineOfCredit"]))
+	debtMoney := common.Float2Money(common.Str2Float(u.Params["debtMoney"]))
+
 	isUpt := false
 	if cardId, ok := u.Params["cardId"]; ok && cardId != "" {
 		f, err := models.FindCard(cardId)
@@ -49,8 +52,15 @@ func (u *CardController) AddCreditCard() {
 				"holder": u.Params["cardholder"],
 				"bill_date": common.Str2Int(u.Params["billDate"]),
 				"due_date": common.Str2Int(u.Params["dueDate"]),
-				"credit_line": common.Float2Money(common.Str2Float(u.Params["lineOfCredit"])),
-				"debt_money": common.Float2Money(common.Str2Float(u.Params["debtMoney"])),
+				"credit_line": creditLine,
+				"debt_money": debtMoney,
+			})
+
+			t := creditLine - f.CreditLine + u.User.TotalCredit
+			d := debtMoney - f.DebtMoney + u.User.TotalDebt
+			u.User.Update(mysql.MapModel{
+				"total_credit": t,
+				"total_debt": d,
 			})
 			isUpt = true
 		}
@@ -63,8 +73,8 @@ func (u *CardController) AddCreditCard() {
 			"holder": u.Params["cardholder"],
 			"bill_date": common.Str2Int(u.Params["billDate"]),
 			"due_date": common.Str2Int(u.Params["dueDate"]),
-			"credit_line": common.Float2Money(common.Str2Float(u.Params["lineOfCredit"])),
-			"debt_money": common.Float2Money(common.Str2Float(u.Params["debtMoney"])),
+			"credit_line": creditLine,
+			"debt_money": debtMoney,
 			"user_id": u.User.Id,
 		})
 	}
@@ -90,6 +100,11 @@ func (u *CardController) DelCreditCard() {
 
 	f.Update(mysql.MapModel{
 		"status": 1,
+	})
+
+	u.User.Update(mysql.MapModel{
+		"total_credit": u.User.TotalCredit - f.CreditLine,
+		"total_debt": u.User.TotalDebt - f.DebtMoney,
 	})
 
 	u.JsonSucc("del success")

@@ -18,6 +18,8 @@ type User struct {
 	Country  	string	`db:"country"`
 	Language  	string	`db:"language"`
 	Remind  	string	`db:"remind"`
+	TotalCredit int		`db:"total_credit"`
+	TotalDebt  	int		`db:"total_debt"`
 }
 
 func (u *User) GetTableName() string {

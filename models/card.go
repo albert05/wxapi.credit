@@ -2,7 +2,10 @@ package models
 
 import (
 	"wxapi.credit/util/mysql"
+	"fmt"
 )
+
+const CARD_TABLE = "card"
 
 type Card struct {
 	Id       	int		`db:"id"`
@@ -21,7 +24,12 @@ type Card struct {
 }
 
 func (u *Card) GetTableName() string {
-	return "card"
+	return CARD_TABLE
+}
+
+func FindCardList(userId int) ([]mysql.MapModel, error) {
+	sql := fmt.Sprintf("select * from %s where user_id=%d", CARD_TABLE, userId)
+	return mysql.FindAll(sql)
 }
 
 func FindCard(cardId string) (*Card, error) {
