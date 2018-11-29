@@ -31,6 +31,11 @@ func init() {
 				&controllers.CardController{},
 			),
 		),
+		beego.NSNamespace("/index",
+			beego.NSInclude(
+				&controllers.IndexController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 
