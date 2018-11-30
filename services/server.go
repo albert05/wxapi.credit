@@ -6,6 +6,9 @@ import (
 	"encoding/gob"
 	"wxapi.credit/models"
 	_ "github.com/astaxie/beego/session/redis"
+	"fmt"
+	"wxapi.credit/util/redis"
+	"wxapi.credit/common"
 )
 
 const LifeTime = 86400 * 29
@@ -16,12 +19,19 @@ func ConfigInit() {
 	dbDsn := beego.AppConfig.String("dbconfig::dsn")
 	mysql.Init(dbDsn)
 
-	InitSession()
+	host := beego.AppConfig.String("redisconfig::host")
+	password := beego.AppConfig.String("redisconfig::password")
+	pool := beego.AppConfig.String("redisconfig::pool")
+	db := beego.AppConfig.String("redisconfig::db")
+
+	// init redis
+	redis.Init(host, password, common.Str2Int(db))
+
+	// init session
+	InitSession(fmt.Sprintf("%s,%s,%s", host, pool, password))
 }
 
-func InitSession() {
-	redisDsn := beego.AppConfig.String("redisconfig::dsn")
-
+func InitSession(dsn string) {
 	gob.Register(models.User{})
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
@@ -30,5 +40,5 @@ func InitSession() {
 	beego.BConfig.WebConfig.Session.SessionCookieLifeTime = LifeTime
 	beego.BConfig.WebConfig.Session.SessionGCMaxLifetime = LifeTime
 	beego.BConfig.WebConfig.Session.SessionName = "gosessionid"
-	beego.BConfig.WebConfig.Session.SessionProviderConfig = redisDsn
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = dsn
 }
