@@ -23,7 +23,7 @@ type User struct {
 }
 
 func (u *User) GetTableName() string {
-	return "user"
+	return "wx_user"
 }
 
 func FindUser(openid string) (*User, error) {
