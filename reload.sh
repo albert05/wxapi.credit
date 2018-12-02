@@ -22,3 +22,4 @@ supervisorctl stop wxapi
 
 # re grant authorization
 chmod -R 755 reload.sh
+chmod -R 755 restart.sh
