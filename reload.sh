@@ -12,7 +12,7 @@ cp conf/app.conf.bat conf/app.conf
 supervisorctl stop wxapi
 
 # get listen port
-pid = `lsof -i:8888 | grep LISTEN | awk -F '[ ]+' '{print $2}'`
+pid=`lsof -i:8888 | grep LISTEN | awk -F '[ ]+' '{print $2}'`
 
 # kill port listen
 kill ${pid}
