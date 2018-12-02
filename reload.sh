@@ -18,7 +18,7 @@ pid = `lsof -i:8888 | grep LISTEN | awk -F '[ ]+' '{print $2}'`
 kill ${pid}
 
 # start fs
-supervisorctl stop wxapi
+supervisorctl start wxapi
 
 # re grant authorization
 chmod -R 755 reload.sh
